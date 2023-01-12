@@ -1,63 +1,116 @@
-const getYieldForPlant = (corn, factor) => {
-    const maxYield = corn.yield;
-    const maxYieldPercentage = 100;
+const getYieldForPlant = (corn, factors) => {
+    const yieldForPlant = corn.yield;
 
-    if (!factor) {
-        return maxYield;
+    if (!factors) {
+        return yieldForPlant;
     }
-    else if (factor.sun === "low" && factor.wind === "medium") {
-        const sunLowGrowPercentage = corn.factor.sun.low;
-        const sunLowGrowFactor = 1 + (sunLowGrowPercentage / maxYieldPercentage);
-
-        const windMediumGrowPercentage = corn.factor.wind.medium;
-        const windMediumGrowFactor = 1 + (windMediumGrowPercentage / maxYieldPercentage);
-
-        const cornYield = Math.round(maxYield * sunLowGrowFactor * windMediumGrowFactor);
-        return cornYield;
+    else {
+        const sunValue = factors.sun;
+        const windValue = factors.wind;
+        const sunFactor = 1 + (corn.factor.sun[sunValue] / 100);
+        const windFactor = 1 + (corn.factor.wind[windValue] / 100);
+        const yieldForPlantWithFactors = Math.round(yieldPlant * sunFactor * windFactor);
+        return yieldForPlantWithFactors;
     }
 };
 
+const getYieldForCrop = (input, factors) => {
+    const yieldForCrop = input.crop.yield * input.numCrops;
 
-const getYieldForCrop = (input) => {
-    return input.crop.yield * input.numCrops;
+    if (!factors) {
+        return yieldForCrop;
+    }
+    else {
+        const sunValue = factors.sun;
+        const windValue = factors.wind;
+        const sunFactor = 1 + (input.crop.factor.sun[sunValue] / 100);
+        const windFactor = 1 + (input.crop.factor.wind[windValue] / 100);
+        const yieldForCropWithFactors = Math.round(yieldForCrop * sunFactor * windFactor);
+        return yieldForCropWithFactors;
+    }
 };
 
-const getTotalYield = (input) => {
+const getTotalYield = (input, factors) => {
     const crops = input.crops;
-    const cropYieldArray = crops.map(veggie => veggie.crop.yield * veggie.numCrops);
-    const totalYield = cropYieldArray.reduce((accumulator, currentValue) => {
-        return accumulator + currentValue;
-    });
-    return totalYield;
+
+    if (!factors) {
+        const cropYieldArray = crops.map(veggie => veggie.crop.yield * veggie.numCrops);
+        const totalYield = cropYieldArray.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        });
+        return totalYield;
+    }
+    else {
+        const totalYieldArray = crops.map(veggie => {
+            const sunValue = factors.sun;
+            const windValue = factors.wind;
+            const sunFactor = 1 + (veggie.crop.factor.sun[sunValue] / 100);
+            const windFactor = 1 + (veggie.crop.factor.wind[windValue] / 100);
+            const maxYieldForCrop = veggie.crop.yield * veggie.numCrops;
+            const yieldForCrop = Math.round(maxYieldForCrop * sunFactor * windFactor);
+            return yieldForCrop;
+        });
+
+        const totalYieldWithFactors = totalYieldArray.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        });
+        return totalYieldWithFactors;
+    };
 };
+
 
 const getCostsForCrop = (input) => {
     return input.numCrops * input.crop.cost;
 };
 
-const getRevenueForCrop = (input) => {
+const getRevenueForCrop = (input, factors) => {
     const totalYield = input.crop.yield * input.numCrops;
-    return totalYield * input.crop.salePrice;
+
+    if (!factors) {
+        const revenueForCrop = totalYield * input.crop.salePrice;
+        return revenueForCrop;
+    }
+    else {
+        const sunValue = factors.sun;
+        const windValue = factors.wind;
+        const sunFactor = 1 + (input.crop.factor.sun[sunValue] / 100);
+        const windFactor = 1 + (input.crop.factor.wind[windValue] / 100);
+        const totalYieldWithFactors = Math.round(totalYield * sunFactor * windFactor);
+        return totalYieldWithFactors * input.crop.salePrice;
+    }
 };
 
-const getProfitForCrop = (input) => {
-    const revenue = getRevenueForCrop(input);
+const getProfitForCrop = (input, factors) => {
+    const revenue = getRevenueForCrop(input, factors);
     const costs = getCostsForCrop(input);
-    return revenue - costs;
+    const profit = revenue - costs;
+    return profit;
 };
 
-const getTotalProfit = (input) => {
+const getTotalProfit = (input, factors) => {
     const crops = input.crops;
-    //console.log(crops);
-    const cropProfitArray = crops.map(veggie => {
-        return getRevenueForCrop(veggie) - getCostsForCrop(veggie);
-    });
-    const totalProfit = cropProfitArray.reduce((accumulator, currentValue) => {
-        return accumulator + currentValue;
-    });
-    return totalProfit;
-};
 
+    if (!factors) {
+        const cropProfitArray = crops.map(veggie => {
+            return getRevenueForCrop(veggie) - getCostsForCrop(veggie);
+        });
+        const totalProfit = cropProfitArray.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        });
+        return totalProfit;
+    }
+    else {
+        const totalProfitArray = crops.map(veggie => {
+            console.log(getRevenueForCrop(veggie, factors))
+            console.log(getCostsForCrop(veggie, factors))
+            return getRevenueForCrop(veggie, factors) - getCostsForCrop(veggie, factors);
+        });
+        const totalProfitWithFactors = totalProfitArray.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        });
+        return totalProfitWithFactors;
+    }
+};
 
 
 module.exports = {
@@ -68,4 +121,4 @@ module.exports = {
     getRevenueForCrop,
     getProfitForCrop,
     getTotalProfit,
-}
+};

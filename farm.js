@@ -1,6 +1,22 @@
-const getYieldForPlant = (corn) => {
-    return corn.yield * 1;
+const getYieldForPlant = (corn, factor) => {
+    const maxYield = corn.yield;
+    const maxYieldPercentage = 100;
+
+    if (!factor) {
+        return maxYield;
+    }
+    else if (factor.sun === "low" && factor.wind === "medium") {
+        const sunLowGrowPercentage = corn.factor.sun.low;
+        const sunLowGrowFactor = 1 + (sunLowGrowPercentage / maxYieldPercentage);
+
+        const windMediumGrowPercentage = corn.factor.wind.medium;
+        const windMediumGrowFactor = 1 + (windMediumGrowPercentage / maxYieldPercentage);
+
+        const cornYield = Math.round(maxYield * sunLowGrowFactor * windMediumGrowFactor);
+        return cornYield;
+    }
 };
+
 
 const getYieldForCrop = (input) => {
     return input.crop.yield * input.numCrops;

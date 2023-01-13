@@ -7,7 +7,6 @@ const {
     getProfitForCrop,
     getTotalProfit } = require("./farm");
 
-
 describe("getYieldForPlant", () => {
     const corn = {
         name: "corn",
@@ -123,7 +122,7 @@ describe("getTotalYield", () => {
 
     test("Calculate total yield with multiple crops and environmental factors", () => {
         expect(getTotalYield({ crops }, environmentFactors)).toBe(62);
-    })
+    });
 
     test("Calculate total yield with 0 amount", () => {
         const corn = {
